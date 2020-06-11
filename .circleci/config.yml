@@ -1,10 +1,12 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@0.2.1
-
+#  python: circleci/python@0.2.1
+  sonarcloud: sonarsource/sonarcloud@1.0.1
 jobs:
   build-and-test:
+    docker:
+      - image: circleci/python:3.7.3
     executor: python/default
     steps:
       - checkout
@@ -14,8 +16,10 @@ jobs:
       - run:
           command: ./manage.py test
           name: Test
+      - sonarcloud/scan
 
 workflows:
   main:
     jobs:
-      - build-and-test
+      - build-and-test:
+          context: SonarCloud
