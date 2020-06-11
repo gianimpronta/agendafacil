@@ -1,13 +1,9 @@
 version: 2.1
-
 orbs:
   sonarcloud: sonarsource/sonarcloud@1.0.1
   pipenv: frameio/pipenv@0.14.0
-
 jobs:
   build-and-test:
-    docker:
-      - image: circleci/python:3.7.3
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
