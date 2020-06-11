@@ -3,6 +3,8 @@ version: 2.1
 orbs:
   python: circleci/python@0.2.1
   sonarcloud: sonarsource/sonarcloud@1.0.1
+  pipenv: frameio/pipenv@0.14.0
+
 jobs:
   build-and-test:
     docker:
@@ -10,12 +12,21 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          command: ./manage.py test
-          name: Test
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.7/site-packages
+      - restore_cache:  # ensure this step occurs *before* installing dependencies
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+      - pipenv/build
+      - save_cache:
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.6/site-packages"
+      - pipenv/shell:
+        args: python manage.py test
+        requires: 
+        - pipenv/build
       - sonarcloud/scan
 
 workflows:
