@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@0.2.1
   sonarcloud: sonarsource/sonarcloud@1.0.1
   pipenv: frameio/pipenv@0.14.0
 
@@ -9,7 +8,6 @@ jobs:
   build-and-test:
     docker:
       - image: circleci/python:3.7.3
-    executor: python/default
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -22,11 +20,11 @@ jobs:
           paths:
             - ".venv"
             - "/usr/local/bin"
-            - "/usr/local/lib/python3.6/site-packages"
+            - "/usr/local/lib/python3.7/site-packages"
       - pipenv/shell:
-        args: python manage.py test
-        requires: 
-        - pipenv/build
+          args: python manage.py test
+          requires: 
+            - pipenv/build
       - sonarcloud/scan
 
 workflows:
