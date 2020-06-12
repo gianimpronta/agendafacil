@@ -32,9 +32,33 @@ jobs:
           path: test-results
           destination: tr1
       - sonarcloud/scan
-
+  deploy:
+    docker: # run the steps with Docker
+      # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
+      - image: circleci/python:3.7.3
+        environment: # environment variables for primary container
+          PIPENV_VENV_IN_PROJECT: true
+    steps:
+      - checkout
+      - run:
+          name: Deploy Master to Heroku
+          command: |
+            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
 workflows:
-  main:
+  dev:
     jobs:
       - build-and-test:
           context: SonarCloud
+  build-deploy:
+    jobs:
+      - build-and-test:
+          context: SonarCloud
+      - deploy:
+          context: Heroku
+          requires:
+            - build-and-test
+          filters:
+            branches:
+              only: master
+              
+  
